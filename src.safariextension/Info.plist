@@ -19,7 +19,7 @@
 	<key>Chrome</key>
 	<dict>
 		<key>Global Page</key>
-		<string>background.html</string>
+		<string>safari.html</string>
 		<key>Toolbar Items</key>
 		<array>
 			<dict>
@@ -40,7 +40,7 @@
 		<dict>
 			<key>End</key>
 			<array>
-				<string>injected.js</string>
+				<string>safari-injected.js</string>
 			</array>
 		</dict>
 	</dict>
