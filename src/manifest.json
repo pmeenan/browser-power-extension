@@ -1,0 +1,18 @@
+{
+  "name": "Browser Power",
+  "version": "0.1",
+  "description": "Runs a battery run-down test while browsing.",
+  "background": {
+    "scripts": ["shared.js", "chrome.js"]
+	},
+  "browser_action": {
+    "default_title": "Browser Power",
+    "default_icon": "battery.png"
+  },
+  "permissions": [
+    "tabs",
+    "http://*/*",
+    "https://*/*"
+  ],
+  "manifest_version": 2
+}

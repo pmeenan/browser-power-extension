@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="application/javascript" src="shared.js"/>
+<script type="application/javascript">
+// Safari-specific logic
+var doNavigate = function(url) {
+  safari.application.activeBrowserWindow.activeTab.url = url;
+};
+
+var doScroll = function(amount) {
+  safari.application.activeBrowserWindow.activeTab.page.dispatchMessage("scroll", amount);
+};
+
+function performCommand(event)
+{
+  if (event.command === "StartBatteryTest" && !g_isActive) {
+    startTest();
+  }
+}
+ 
+function validateCommand(event)
+{
+  if (event.command === "StartBatteryTest") {
+    event.target.disabled = g_isActive;
+  }
+}
+
+safari.application.addEventListener("command", performCommand, false);
+safari.application.addEventListener("validate", validateCommand, false);
+safari.application.activeBrowserWindow.activeTab.addEventListener("navigate", function(){
+  onload();
+}, false);
+
+</script>
+</head>
+<body>
+</body>
+</html>
