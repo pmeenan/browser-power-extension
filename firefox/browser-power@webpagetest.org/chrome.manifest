@@ -1,0 +1,3 @@
+content browser-power chrome/content/
+
+overlay chrome://browser/content/browser.xul	chrome://browser-power/content/overlay.xul
