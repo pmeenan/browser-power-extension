@@ -9,11 +9,32 @@ var g_testID = undefined;
 var g_task = undefined;
 var g_taskTimer = undefined;
 var g_scrollCount = 0;
+var g_measuring = false;
 
 var watchdog = function() {
   if (g_task === undefined) {
     console.log("watchdog");
     getNextTask();
+  }
+}
+
+var startMeasurement = function() {
+  console.log("Starting measurement");
+  window.setInterval(watchdog, WATCHDOG_INTERVAL);
+  g_isActive = true;
+  try {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'http://127.0.0.1:8765/start', true);
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState == 4) {
+        if (xhr.responseText == 'OK')
+          g_measuring = true;
+        processTask();
+      }
+    };
+    xhr.send();
+  } catch (err) {
+    processTask();
   }
 }
 
@@ -36,7 +57,7 @@ var startTest = function() {
           }
           if (resp.result == 200 && resp.id) {
             g_testID = resp.id;
-              getNextTask();
+            getNextTask();
           }
         }
       }
@@ -65,13 +86,54 @@ var getNextTask = function() {
             g_task.loaded = false;
             g_task.scrolled = false;
             g_task.waited = false;
-            processTask();
+            startMeasurement();
           }
         }
       }
     };
     xhr.send();
   } catch (err) {}
+}
+
+var reportMeasurement = function(data) {
+  if (g_measuring) {
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', 'http://power.webpagetest.org/report.php?test=' + g_testID, true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4) {
+          startMeasurement();
+        }
+      };
+      xhr.send(data);
+    } catch (err) {}
+  } else {
+    getNextTask();
+  }
+}
+
+var collectMeasurement = function(action) {
+  if (g_measuring) {
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', 'http://127.0.0.1:8765/measure', true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4 && xhr.responseText.length > 0) {
+          try {
+            var resp = JSON.parse(xhr.responseText);
+            resp.action = action;
+            resp.url = g_task.url;
+            reportMeasurement(JSON.stringify(resp));
+          } catch (err) {
+            startMeasurement();
+          }
+        }
+      };
+      xhr.send();
+    } catch (err) {}
+  } else {
+    getNextTask();
+  }
 }
 
 var scrollPage = function() {
@@ -81,7 +143,7 @@ var scrollPage = function() {
     doScroll(SCROLL_AMOUNT);
     setTimeout(scrollPage, SCROLL_DELAY);
   } else {
-    processTask();
+    collectMeasurement('Scroll');
   }
 };
 
@@ -100,7 +162,7 @@ var processTask = function() {
       doNavigate(g_task.url);
     } else if (!g_task.waited && g_task.loaded_ok && g_task.wait > 0) {
       g_task.waited = true;
-      setTimeout(processTask, g_task.wait * 1000);
+      setTimeout(function() {collectMeasurement('wait');}, g_task.wait * 1000);
     } else if (!g_task.scrolled && g_task.loaded_ok && g_task.scroll) {
       g_task.scrolled = true;
       g_scrollCount = 0;
@@ -118,6 +180,6 @@ var onload = function() {
   if (g_isActive && g_task !== undefined && !g_task.loaded_ok) {
     console.log("onload");
     g_task.loaded_ok = true;
-    processTask();
+    collectMeasurement('load');
   }
 };
