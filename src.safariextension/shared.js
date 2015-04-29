@@ -27,8 +27,6 @@ var watchdog = function() {
 
 var startMeasurement = function() {
   console.log("Starting measurement");
-  window.setInterval(watchdog, WATCHDOG_INTERVAL);
-  g_isActive = true;
   try {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', 'http://127.0.0.1:8765/start', true);
