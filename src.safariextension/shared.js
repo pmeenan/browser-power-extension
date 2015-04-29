@@ -12,6 +12,13 @@ var g_scrollCount = 0;
 var g_measuring = false;
 
 var watchdog = function() {
+  if (g_isActive) {
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', 'http://power.webpagetest.org/ping.php?test=' + g_testID, true);
+      xhr.send();
+    } catch (err) {}
+  }
   if (g_task === undefined) {
     console.log("watchdog");
     getNextTask();
