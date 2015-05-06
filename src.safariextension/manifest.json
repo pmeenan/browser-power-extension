@@ -5,6 +5,13 @@
   "background": {
     "scripts": ["shared.js", "chrome.js"]
 	},
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["chrome-injected.js"],
+      "run_at": "document_end"
+    }
+  ],
   "browser_action": {
     "default_title": "Browser Power",
     "default_icon": "battery.png"

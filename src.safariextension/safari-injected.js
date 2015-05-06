@@ -1,8 +1,12 @@
+var powerScrollDirection = 1;
+var powerLastScrollTop = -1;
 function handleMessage(msgEvent) {
     if (msgEvent.name === "scroll") {
-    	document.body.scrollTop = document.body.scrollTop + msgEvent.message;
+    	if (document.body.scrollTop == powerLastScrollTop)
+    		powerScrollDirection = powerScrollDirection * -1;
+    	powerLastScrollTop = document.body.scrollTop;
+    	var amount = msgEvent.message * powerScrollDirection;
+    	document.body.scrollTop = document.body.scrollTop + amount;
     }
-    console.log("message");
 }
 safari.self.addEventListener("message", handleMessage, false);
-console.log("Injected");
